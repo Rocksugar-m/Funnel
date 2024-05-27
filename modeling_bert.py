@@ -285,36 +285,6 @@ class BertSelfAttention(nn.Module):
 
         query_layer = self.transpose_for_scores(mixed_query_layer)
 
-        # if query_layer.size()[2] == 512:
-        #     from float_to_fixed import float_to_fixed
-        #     f = open('./data_cola_b.txt', 'w')
-        #     s = ''
-        #     for i in range(query_layer.size()[2]//16):
-        #         for j in range(query_layer.size()[3]):
-        #             s = ''
-        #             for n in range(15,-1,-1):
-        #                 fixed = float_to_fixed(query_layer[0, 0, i*16+n, j].cpu().numpy().tolist(), 5, 10)
-        #                 s += fixed
-        #             f.write(s)
-        #             f.write('\n')
-        #     for i in range(key_layer.size()[2]//32):
-        #         for j in range(key_layer.size()[3]):
-        #             s = ''
-        #             for n in range(31,-1,-1):
-        #                 fixed = float_to_fixed(key_layer[0, 0, i*32+n, j].cpu().numpy().tolist(), 5, 10)
-        #                 s += fixed
-        #             f.write(s)
-        #             f.write('\n')
-        #     for i in range(value_layer.size()[2]//32):
-        #         for j in range(value_layer.size()[3]):
-        #             s = ''
-        #             for n in range(31,-1,-1):
-        #                 fixed = float_to_fixed(value_layer[0, 0, i*32+n, j].cpu().numpy().tolist(), 5, 10)
-        #                 s += fixed
-        #             f.write(s)
-        #             f.write('\n')
-        #     f.close()
-            # exit()
         if self.is_decoder:
             # if cross_attention save Tuple(torch.Tensor, torch.Tensor) of all cross attention key/value_states.
             # Further calls to cross_attention layer can then reuse all cross-attention
@@ -325,54 +295,17 @@ class BertSelfAttention(nn.Module):
             # if encoder bi-directional self-attention `past_key_value` is always `None`
             past_key_value = (key_layer, value_layer)
 
-        print(query_layer.min(), query_layer.max(), query_layer.mean())
-        print(key_layer.min(), key_layer.max(), key_layer.mean())
-        print(value_layer.min(), value_layer.max(), value_layer.mean())
-        import matplotlib.pyplot as plt # 可视化
-        q = query_layer.cpu()
-        print(q.size())
-        plt.hist(q[0,5,:,:].flatten(), bins=100,)
-        plt.show()
-        exit()
         # Take the dot product between "query" and "key" to get the raw attention scores.
         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
         
-        # thresholds_q = [-6.982421875, -6.93359375, -6.791015625, -6.4375, -5.708984375, -4.455078125, -2.65625, -0.498046875, 1.65625, 3.455078125, 4.708984375, 5.4375, 5.791015625, 5.93359375, 5.982421875]
-        # thresholds_k = [-5.98046875, -5.927734375, -5.7734375, -5.39453125, -4.609375, -3.259765625, -1.322265625, 1.0, 3.322265625, 5.259765625, 6.609375, 7.39453125, 7.7734375, 7.927734375, 7.98046875]
-        
-        # thresholds_q = [-10.0, -8.5703125, -7.142578125, -5.712890625, -4.28515625, -2.85546875, -1.427734375, 0.0, 1.427734375, 2.85546875, 4.28515625, 5.712890625, 7.142578125, 8.5703125, 10.0]
-        # thresholds_k = [-10.0, -8.5703125, -7.142578125, -5.712890625, -4.28515625, -2.85546875, -1.427734375, 0.0, 1.427734375, 2.85546875, 4.28515625, 5.712890625, 7.142578125, 8.5703125, 10.0]
-        
-        # thresholds_q = [-5.982421875, -5.9375, -5.806640625, -5.48046875, -4.80859375, -3.650390625, -1.990234375, 0.0, 1.990234375, 3.650390625, 4.80859375, 5.48046875, 5.806640625, 5.9375, 5.982421875]
-        # thresholds_k = [-5.982421875, -5.9375, -5.806640625, -5.48046875, -4.80859375, -3.650390625, -1.990234375, 0.0, 1.990234375, 3.650390625, 4.80859375, 5.48046875, 5.806640625, 5.9375, 5.982421875]
-        
-        # thresholds_q = [-11.0, -9.5, -8.0, -6.5, -5.0, -3.5, -2.0, -0.5, 1.0, 2.5, 4.0, 5.5, 7.0, 8.5, 10.0]
-        # thresholds_k = [-10.0, -8.5, -7.0, -5.5, -4.0, -2.5, -1.0, 0.5, 2.0, 3.5, 5.0, 6.5, 8.0, 9.5, 11.0]
-
-        # thresholds_q = [-10.0, -8.642578125, -7.28515625, -5.927734375, -4.5703125, -3.212890625, -1.85546875, -0.498046875, 0.85546875, 2.212890625, 3.5703125, 4.927734375, 6.28515625, 7.642578125, 9.0]
-        # thresholds_k = [-10.0, -8.642578125, -7.28515625, -5.927734375, -4.5703125, -3.212890625, -1.85546875, -0.498046875, 0.85546875, 2.212890625, 3.5703125, 4.927734375, 6.28515625, 7.642578125, 9.0]
-        # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        # thresholds_q = [-9.0, -7.615234375, -6.23046875, -4.845703125, -3.4609375, -2.076171875, -0.69140625, 0.69140625, 2.076171875, 3.4609375, 4.845703125, 6.23046875, 7.615234375, 9.0]
-        # thresholds_k = [-9.0, -7.615234375, -6.23046875, -4.845703125, -3.4609375, -2.076171875, -0.69140625, 0.69140625, 2.076171875, 3.4609375, 4.845703125, 6.23046875, 7.615234375, 9.0]
-        # thresholds_q = [-10.0, -8.642578125, -7.28515625,  -4.5703125, -3.212890625, -1.85546875, -0.498046875, 0.85546875, 2.212890625, 3.5703125, 4.927734375, 6.28515625, 7.642578125, 9.0]
-        # thresholds_k = [-10.0, -8.642578125, -7.28515625,  -4.5703125, -3.212890625, -1.85546875, -0.498046875, 0.85546875, 2.212890625, 3.5703125, 4.927734375, 6.28515625, 7.642578125, 9.0]
         thresholds_q = [-10.0, -8.5, -7,  -4.5, -3, -1.5, -0.5, 1, 2.5, 3.5, 5.0, 6.25, 7.75, 9.0]
         thresholds_k = [-10.0, -8.5, -7,  -4.5, -3, -1.5, -0.5, 1, 2.5, 3.5, 5.0, 6.25, 7.75, 9.0]
-        # thresholds_q = [-10.0, -8.5, -7,  -5.5, -4, -2.5, -1.0, 0.5, 2.0, 3.5, 5.0, 6.5, 8.0, 9.5]
-        # thresholds_k = [-10.0, -8.5, -7,  -5.5, -4, -2.5, -1.0, 0.5, 2.0, 3.5, 5.0, 6.5, 8.0, 9.5]
-        # thresholds_q = [-9.5, -8.0, -6.5,  -5.0, -3.5, -2.0, -0.5, 1.0, 2.5, 4.0, 5.5, 7.0, 8.5, 10.0]
-        # thresholds_k = [-9.5, -8.0, -6.5,  -5.0, -3.5, -2.0, -0.5, 1.0, 2.5, 4.0, 5.5, 7.0, 8.5, 10.0]
-        # -----------------------------------------------------------------------------------------------------------------------------------
-        # thresholds_q = [-6.0, -5.15234375, -4.306640625, -3.4609375, -2.615234375, -1.767578125, -0.921875, -0.076171875, 0.767578125, 1.615234375, 2.4609375, 3.306640625, 4.15234375, 4.998046875]
-        # thresholds_k = [-6.0, -5.15234375, -4.306640625, -3.4609375, -2.615234375, -1.767578125, -0.921875, -0.076171875, 0.767578125, 1.615234375, 2.4609375, 3.306640625, 4.15234375, 4.998046875]
+
         values = [torch.tensor(-7.0, device=hidden_states.device), torch.tensor(-6.0, device=hidden_states.device), torch.tensor(-5.0, device=hidden_states.device), torch.tensor(-4.0, device=hidden_states.device),
                   torch.tensor(-3.0, device=hidden_states.device), torch.tensor(-2.0, device=hidden_states.device), torch.tensor(-1.0, device=hidden_states.device),
                   torch.tensor(0.0, device=hidden_states.device), torch.tensor(1.0, device=hidden_states.device), torch.tensor(2.0, device=hidden_states.device), torch.tensor(3.0, device=hidden_states.device),
                   torch.tensor(4.0, device=hidden_states.device), torch.tensor(5.0, device=hidden_states.device), torch.tensor(6.0, device=hidden_states.device), torch.tensor(7.0, device=hidden_states.device)]
-        # values = [torch.tensor(0.0, device=hidden_states.device), torch.tensor(1.0, device=hidden_states.device), torch.tensor(2.0, device=hidden_states.device), torch.tensor(3.0, device=hidden_states.device),
-        #           torch.tensor(4.0, device=hidden_states.device), torch.tensor(5.0, device=hidden_states.device), torch.tensor(6.0, device=hidden_states.device),
-        #           torch.tensor(7.0, device=hidden_states.device), torch.tensor(8.0, device=hidden_states.device), torch.tensor(9.0, device=hidden_states.device), torch.tensor(10.0, device=hidden_states.device),
-        #           torch.tensor(11.0, device=hidden_states.device), torch.tensor(12.0, device=hidden_states.device), torch.tensor(13.0, device=hidden_states.device), torch.tensor(14.0, device=hidden_states.device)]
+
         values = torch.tensor(values, device=hidden_states.device)
 
         quantized_query_layer = torch.where(query_layer < thresholds_q[0], values[0], query_layer)
@@ -385,57 +318,14 @@ class BertSelfAttention(nn.Module):
             quantized_key_layer = torch.where((key_layer >= thresholds_k[i-1]) & (key_layer < thresholds_k[i]), values[i], quantized_key_layer)
         quantized_key_layer = torch.where(key_layer >= thresholds_k[13], values[14], quantized_key_layer)
 
-        top_k = int(attention_scores.size()[2] * 0.25) # min(32, attention_scores.size()[2]) # 
+        top_k = 32#min(32, attention_scores.size()[2]) # int(attention_scores.size()[2] * 0.25) # 
         quantized_attention_sorces = torch.matmul(quantized_query_layer , quantized_key_layer.transpose(-1, -2))
         quantized_attention_sorces_topk, sorted_index = quantized_attention_sorces.topk(top_k) # attention_scores.topk(top_k) # 
-        # if query_layer.size()[2] == 512: // 非零数据计数
-        #     counter = []
-        #     for i in range(16):
-        #         counter.append(0)
-        #     for i in range(0,16):
-        #         ii = []
-        #         for j in range(top_k):
-        #             ii.append(int(sorted_index[0,0,i,j]))
-        #             index = int(sorted_index[0,0,i,j]//32)
-        #             counter[index] += 1
-        #         print(ii)
-        #     print(counter)
         
         sparsity_mask = torch.ones_like(attention_scores, device=hidden_states.device)
         mask = torch.zeros((attention_scores.size()[0], attention_scores.size()[1], attention_scores.size()[2], top_k), device=hidden_states.device)
         
         sparsity_mask = sparsity_mask.scatter(-1, sorted_index, mask)
-        # if sparsity_mask.size()[2] == 512: # 导出mask
-        #     from float_to_fixed import float_to_fixed
-        #     f = open('./mask/mask_wnli_0.25.txt', 'w')
-        #     s = ''
-        #     for i in range(sparsity_mask.size()[2]//16):
-        #         for j in range(sparsity_mask.size()[3]):
-        #             s = ''
-        #             for n in range(15,-1,-1):
-        #                 inted = 1 - int(sparsity_mask[0, 0, i*16+n, j].cpu().numpy().tolist())
-        #                 s += str(inted)
-        #             f.write(s)
-        #             f.write('\n')
-        #     f.close
-        #     exit()
-
-        # import matplotlib.pyplot as plt # 可视化
-        # plt.matshow(1-sparsity_mask.cpu()[0,0,:,:], cmap=plt.cm.Reds)
-        # plt.show()
-        # if sparsity_mask.size()[2] == 512: # Sanger利用率
-        # from bench_sanger import _eval_load_balance
-        # pe_util = _eval_load_balance(1-sparsity_mask, attention_mask, 32, 8, False)
-        # self.count += 1
-        # self.pe_util = pe_util
-        # count_1 = torch.sum(attention_mask > -1).item()
-        # self.seq_len = sparsity_mask.size()[2]
-        # print(pe_util, self.count, self.pe_util, self.seq_len)
-        # if(self.count == 2):
-        #     exit()
-        # if sparsity_mask.size()[2] > self.seq_len:
-        #     self.seq_len = sparsity_mask.size()[2]
-        #     print(self.count, self.seq_len)
         sparsity_mask = sparsity_mask * -10000.0
 
         attention_scores = attention_scores + sparsity_mask

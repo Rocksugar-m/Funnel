@@ -99,7 +99,7 @@ class DataTrainingArguments:
         },
     )
     overwrite_cache: bool = field(
-        default=True, metadata={"help": "Overwrite the cached preprocessed datasets or not."}
+        default=False, metadata={"help": "Overwrite the cached preprocessed datasets or not."}
     )
     pad_to_max_length: bool = field(
         default=True,
@@ -420,19 +420,13 @@ def main():
             f"model ({tokenizer.model_max_length}). Using max_seq_length={tokenizer.model_max_length}."
         )
     max_seq_length = min(data_args.max_seq_length, tokenizer.model_max_length)
-    # args = (
-    #         (datasets['validation'][:8][sentence1_key],) if sentence2_key is None else (datasets['validation'][:8][sentence1_key], datasets['validation'][:8][sentence2_key])
-    #     )
-    # result = tokenizer(*args, padding='longest', truncation=True) #, max_length=max_seq_length
-    # print(datasets['validation'][:2])
-    # print(len(result['input_ids'][0]))
-    # exit()
+
     def preprocess_function(examples):
         # Tokenize the texts
         args = (
             (examples[sentence1_key],) if sentence2_key is None else (examples[sentence1_key], examples[sentence2_key])
         )
-        result = tokenizer(*args, padding='max_length', max_length=max_seq_length, truncation=True) # padding='longest') # 
+        result = tokenizer(*args, padding='max_length', max_length=max_seq_length, truncation=True)
         # Map labels to IDs (not necessary for GLUE tasks)
         if label_to_id is not None and "label" in examples:
             result["label"] = [(label_to_id[l] if l != -1 else -1) for l in examples["label"]]
@@ -444,8 +438,7 @@ def main():
         load_from_cache_file=not data_args.overwrite_cache,
         desc="Running tokenizer on dataset",
     )
-    # print(len(datasets['validation']['input_ids'][0]))
-    # exit()
+
     if training_args.do_train:
         if "train" not in datasets:
             raise ValueError("--do_train requires a train dataset")
@@ -501,16 +494,6 @@ def main():
     else:
         data_collator = None
     
-    # samples = datasets['validation'][:8]
-    # samples = {k: v for k,v in samples.items() if k not in ['idx', 'sentence1', 'sentence2']}
-    # l = []
-    # for x in samples['input_ids']:
-    #     l.append(len(x))
-    # print(l)
-    # print(samples)
-    # # batch = data_collator(samples)
-    # # print(batch.keys())
-    # exit()
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
