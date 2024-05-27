@@ -23,6 +23,7 @@ import random
 from re import S
 import sys
 from dataclasses import dataclass, field
+from turtle import Turtle
 from typing import Optional
 
 from pathlib import Path

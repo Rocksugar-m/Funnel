@@ -18,10 +18,10 @@ file mkdir $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new
 
 
 
-add_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/design/*.v]
-add_files -fileset sim_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/tb/*.v]
-add_files -fileset constrs_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/constrs_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/constrains/*.xdc]
-add_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/ip -force -quiet [glob -nocomplain $WORK_DIR/ips/*.xci]
+import_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/design/*.v]
+import_files -fileset sim_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/tb/*.v]
+import_files -fileset constrs_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/constrs_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/constrains/*.xdc]
+import_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/ip -force -quiet [glob -nocomplain $WORK_DIR/ips/*.xci]
 
 set_property top attention_top [current_fileset]
 set_property top attention_top_tb [current_fileset -simset]
