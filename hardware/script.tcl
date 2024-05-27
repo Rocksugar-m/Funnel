@@ -16,23 +16,24 @@ file mkdir $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/constrs_1/new
 
 file mkdir $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new
 
+file copy $WORK_DIR/src/tb/data.txt $WORK_DIR/$PROJ_NAME/
 
-
-import_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/design/*.v]
-import_files -fileset sim_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/tb/*.v]
-import_files -fileset constrs_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/constrs_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/constrains/*.xdc]
-import_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/ip -force -quiet [glob -nocomplain $WORK_DIR/ips/*.xci]
+add_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/design/*.v]
+add_files -fileset sim_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sim_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/tb/*.v]
+add_files -fileset constrs_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/constrs_1/new -force -quiet [glob -nocomplain $WORK_DIR/src/constraints/*.xdc]
+add_files -fileset sources_1 -copy_to $WORK_DIR/$PROJ_NAME/$PROJ_NAME.srcs/sources_1/ip -force -quiet [glob -nocomplain $WORK_DIR/ips/*.xci]
 
 set_property top attention_top [current_fileset]
 set_property top attention_top_tb [current_fileset -simset]
 
 #open_project $WORK_DIR/$PROJ_NAME/$PROJ_NAME.xpr
-# launch_simulation
-# run all
-# close_sim
+launch_simulation -quiet
+run all
+close_sim
 
 # launch_runs synth_1 -job 4 -quiet
-# wait_on_run synth_1
-# report_utilization -name utilization_1 -file $WORK_DIR/$PROJ_NAME/Funnel_util.txt 
+# wait_on_run synth_1 -quiet 
+# open_run synth_1
+# report_utilization -name utilization_1 -file $WORK_DIR/$PROJ_NAME/Funnel_util.txt -quiet
 
 close_project

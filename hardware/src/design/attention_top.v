@@ -366,6 +366,19 @@ module attention_top (
     reg r_sp_fetch_en;
     reg bram_q_sp_wea;
     reg [6:0] bram_q_sp_waddr;
+    reg r_sp_fetch_wait;
+
+    always @(posedge clk or negedge rst_n) begin
+        if (rst_n == 1'b0) begin
+            r_sp_fetch_wait <= 1'b0;
+        end 
+        else if(r_sp_fetch_en == 1'b1) begin
+            r_sp_fetch_wait <= 1'b1;
+        end
+        else if(i_cu_start | w_cu_request) begin
+            r_sp_fetch_wait <= 1'b0;
+        end
+    end
     
     always @(posedge clk or negedge rst_n) begin
         if(rst_n == 1'b0) begin
@@ -385,7 +398,7 @@ module attention_top (
         else if((state_w_sp == 2'b01 & r_counter1 == 63) | (state_w_sp == 2'b10 & r_counter1 == 127)) begin
             r_sp_fetch_en <= 0;
         end
-        else if(w_sp_gen_over) begin
+        else if(w_sp_gen_over & ~r_sp_fetch_wait) begin
             r_sp_fetch_en <= 1;
         end
     end
