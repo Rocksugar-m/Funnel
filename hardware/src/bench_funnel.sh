@@ -1,0 +1,1 @@
+vivado -mode batch -source script.tcl
